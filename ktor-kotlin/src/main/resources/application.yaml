@@ -1,0 +1,11 @@
+ktor:
+  deployment:
+    port: 8080
+  application:
+    modules:
+      - com.postgres.amqp.SerializationKt.configureSerialization
+      - com.postgres.amqp.RequestValidationKt.configureRequestValidation
+      - com.postgres.amqp.RabbitmqKt.configureRabbitmq
+      - com.postgres.amqp.ExposedKt.configureExposed
+      - com.postgres.amqp.PostgresKt.configurePostgres
+      - com.postgres.amqp.RoutingKt.configureRouting

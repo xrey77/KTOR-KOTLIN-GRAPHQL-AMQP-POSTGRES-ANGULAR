@@ -1,0 +1,31 @@
+<!-- @if (pdfUrl) {
+  <div class="pdf-container bg-dark">
+    <object 
+      [data]="pdfUrl" 
+      type="application/pdf" 
+      width="100%" 
+      height="600px">
+      <p>
+        Your browser does not support inline PDFs. 
+        <a [href]="pdfUrl" download="report.pdf">Download PDF instead</a>.
+      </p>
+    </object>
+  </div>
+} @else {
+  <p class="text-center mt-5">Loading report...</p>
+} -->
+
+<!-- <button (click)="generatePdfFromGraphql()">Generate Report</button> -->
+
+<div class="pdf-container" style="margin-top: 20px;">
+  @if (pdfUrl()) {
+    <iframe 
+      [src]="pdfUrl()" 
+      width="100%" 
+      height="800px" 
+      frameborder="0">
+    </iframe>
+  } @else {
+    <p>No report generated yet.</p>
+  }
+</div>
