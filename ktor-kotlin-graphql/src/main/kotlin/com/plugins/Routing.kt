@@ -13,20 +13,24 @@ import io.ktor.server.http.content.staticFiles
 import io.ktor.server.http.content.staticResources
 
 import com.expediagroup.graphql.server.ktor.GraphQL
-import com.api.graphql.queries.UserQuery
-import com.api.graphql.mutations.UserMutation
+import com.api.graphql.queries.UserLookupQuery
+import com.api.graphql.queries.UserListQuery
+
+import com.api.graphql.mutations.CreateUserMutation
+import com.api.graphql.mutations.LoginUserMutation
+import com.api.graphql.mutations.UpdateProfileMutation
+import com.api.graphql.mutations.ChangePasswordMutation
+import com.api.graphql.mutations.ActivateMfaMutation
+import com.api.graphql.mutations.OtpMfaMutation
+import com.api.graphql.mutations.UploadpicMutation
+
 import com.expediagroup.graphql.server.ktor.graphQLPostRoute
 import com.expediagroup.graphql.server.ktor.graphiQLRoute
 import com.expediagroup.graphql.server.ktor.graphQLGetRoute
-
-// import com.expediagroup.graphql.generator.SchemaGeneratorConfig
-// import com.expediagroup.graphql.generator.TopLevelObject
-// import com.expediagroup.graphql.generator.toSchema
-// import graphql.schema.GraphQLSchema
-
-
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+
+
 
 fun Application.configureRouting() {
     log.info("test............................")     
@@ -34,8 +38,19 @@ fun Application.configureRouting() {
     install(GraphQL) {
         schema {
             packages = listOf("com.api.graphql", "com.api.model")
-            queries = listOf(UserQuery())
-            mutations = listOf(UserMutation())
+            queries = listOf(
+                UserLookupQuery(),
+                UserListQuery()
+            )
+            mutations = listOf(
+                CreateUserMutation(),
+                LoginUserMutation(),
+                UpdateProfileMutation(),
+                ChangePasswordMutation(),
+                ActivateMfaMutation(),
+                OtpMfaMutation(),
+                UploadpicMutation()
+            )            
         }
     }
 

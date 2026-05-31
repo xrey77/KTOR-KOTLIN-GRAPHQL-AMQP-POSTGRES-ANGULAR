@@ -11,6 +11,7 @@ import com.api.model.dto.UserLoginDto
 import com.api.model.RegisterModel
 import com.api.model.LoginModel
 import com.api.model.UserModel
+import com.api.model.OtpVerificationResponse
 import com.api.model.UploadPicModel
 import com.api.model.ActivateMfaModel
 import com.repositories.UserRepositoryImpl
@@ -22,6 +23,17 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import java.io.File
+import java.util.Base64
+
+// import io.ktor.http.content.PartData
+// import io.ktor.http.content.forEachPart
+// import io.ktor.http.content.streamProvider
+// import io.ktor.server.request.receiveMultipart
+// import java.io.File
+import io.ktor.utils.io.* 
+import kotlinx.io.*
+
+
 
 class UserService(private val userRepository: UserRepositoryImpl) {
 
@@ -126,76 +138,77 @@ class UserService(private val userRepository: UserRepositoryImpl) {
     //     }
     // }    
 
-    // suspend fun upateUserProfile(id: Int, fname: String, lname: String, mobile: String): String {
-    //     val updatedRows = userRepository.findUserById(id)
-    //     if (updatedRows == null) {
-    //         throw IllegalArgumentException("User not found, please register now.")
-    //     } 
-    //     userRepository.updateProfile(id, fname, lname, mobile)
-    //     return "You have update your profile successfully."        
+    suspend fun updateUserProfile(id: Int, firstname: String, lastname: String, mobile: String): String? {
+        val updatedRows = userRepository.findUserById(id)
+        if (updatedRows == null) {
+            throw IllegalArgumentException("User not found, please register now.")
+        } 
+        userRepository.updateProfile(id, firstname, lastname, mobile)        
+        return "You have updated your profile successfully."
+    }    
+
+
+    suspend fun updatePassword(id: Int, pword: String): String? {
+        val updatedRows = userRepository.findUserById(id)
+        if (updatedRows == null) {
+            throw IllegalArgumentException("User not found, please register now.")
+        } 
+
+        val hashedPwd = PasswordHasher.hash(pword)
+
+        userRepository.changePassword(id, hashedPwd)
+        return "You have changed your password successfully."        
         
-    // }    
+    }    
 
 
-    // suspend fun updatePassword(id: Int, pword: String): String {
-    //     val updatedRows = userRepository.findUserById(id)
-    //     if (updatedRows == null) {
-    //         throw IllegalArgumentException("User not found, please register now.")
-    //     } 
+    suspend fun activateMfa(id: Int, twofactorenabled: Boolean): ActivateMfaModel {
+        val userData = userRepository.findUserById(id)
+        if (userData == null) {
+            throw IllegalArgumentException("User not found, please register now.")
+        } 
 
-    //     val hashedPwd = PasswordHasher.hash(pword)
+        if (twofactorenabled) {
+            // println("Mfa Enabled......")            
+            val secret = totService.generateSecret()
+            val b64qrcode = totService.getQrCodeUrl(secret, userData.email, "Arab Bank")
+            userRepository.activateMfa(id, twofactorenabled, secret, b64qrcode)
+            val result = ActivateMfaModel(message="Multi-Factor Authenticator has been enabled.",qrcodeurl=b64qrcode)
+            return result
+        } else {
+            // println("Mfa Disabled......")
+            val secret = ""
+            val qrcodeurl = ""
+            userRepository.activateMfa(id, twofactorenabled, secret, qrcodeurl)
+            val result = ActivateMfaModel(message="Multi-Factor Authenticator has been disabled.",qrcodeurl=null)
+            return result
+        }
+    }    
 
-    //     userRepository.changePassword(id, hashedPwd)
-    //     return "You have changed your password successfully."        
-        
-    // }    
+    suspend fun verifyTotp(id: Int, otp: String): OtpVerificationResponse {
+        val checkUserid = userRepository.findOtpVerification(id)
+        if (checkUserid == null) {
+            throw IllegalArgumentException("User not found, please register now.")
+        } 
+        if (checkUserid.secret == null) {
+            throw IllegalArgumentException("Multi-Factor Authenticator is not yet enabled.")
+        } 
 
+        val res = totService.verifyOtp(checkUserid.secret, otp)
+        if (res) {
+            return OtpVerificationResponse(message="OTP code veried successfully.", username = checkUserid.username)
+        } else {
+            throw IllegalArgumentException("Invalid OTP code, please try again.")
+        }
+    }
 
-    // suspend fun activateMfa(id: Int, twofactorenabled: Boolean): ActivateMfaModel {
-    //     val userData = userRepository.findUserById(id)
-    //     if (userData == null) {
-    //         throw IllegalArgumentException("User not found, please register now.")
-    //     } 
-
-
-    //     if (twofactorenabled) {
-    //         // println("Mfa Enabled......")            
-    //         val secret = totService.generateSecret()
-    //         val b64qrcode = totService.getQrCodeUrl(secret, userData.email, "Arab Bank")
-    //         userRepository.activateMfa(id, twofactorenabled, secret, b64qrcode)
-    //         val result = ActivateMfaModel(message="Multi-Factor Authenticator has been enabled.",qrcodeurl=b64qrcode)
-    //         return result
-    //     } else {
-    //         // println("Mfa Disabled......")
-    //         val secret = ""
-    //         val qrcodeurl = ""
-    //         userRepository.activateMfa(id, twofactorenabled, secret, qrcodeurl)
-    //         val result = ActivateMfaModel(message="Multi-Factor Authenticator has been disabled.",qrcodeurl=null)
-    //         return result
-    //     }
-    // }    
-
-    // suspend fun verifyTotp(id: Int, otp: String): String {
-    //     val checkUserid = userRepository.findMfaUserId(id)
-    //     if (checkUserid == null) {
-    //         throw IllegalArgumentException("User not found, please register now.")
-    //     } 
-    //     val res = totService.verifyOtp(checkUserid.secret, otp)
-    //     if (res) {
-    //         return "Ok"
-    //     } else {
-    //         throw IllegalArgumentException("Invalid OTP code, please try again.")
-    //     }
-    // }
-
-    // suspend fun uploadProfilepic(id: Int, userpic: String): UploadPicModel {
-    //    var updatepic = userRepository.uploadUpdateProfilepic(id, userpic)
-    //    return UploadPicModel(
-    //         message="You have change your profile picture successfully.",
-    //         userpic=userpic
-    //    )
-
-    // }
+    suspend fun uploadProfilepic(id: Int, userpic: String): UploadPicModel {
+       var updatepic = userRepository.uploadUpdateProfilepic(id, userpic)
+       return UploadPicModel(
+            message="You have change your profile picture successfully.",
+            userpic=userpic
+       )
+    }
 
 
 

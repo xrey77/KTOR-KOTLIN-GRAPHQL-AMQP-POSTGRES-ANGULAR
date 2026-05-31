@@ -9,16 +9,29 @@ group = "com.postgres.amqp"
 version = "1.0.0-SNAPSHOT"
 
 application {
-    mainClass.set("io.ktor.server.netty.EngineMain")    
-    applicationDefaultJvmArgs = listOf("-Dlogback.configurationFile=logback-custom.xml")    
-    mainClass.set("io.ktor.server.tomcat.jakarta.EngineMain")    
+    // mainClass.set("io.ktor.server.netty.EngineMain")    
+    mainClass.set("com.api.ApplicationKt")     
+
     applicationDefaultJvmArgs = listOf(
+        "-Djava.awt.headless=true",
+        "-Dlogback.configurationFile=logback-custom.xml",
         "--enable-native-access=ALL-UNNAMED",
         "-Dio.ktor.development=true"
-    )    
+    )        
+    // mainClass.set("io.ktor.server.netty.EngineMain")    
+    // applicationDefaultJvmArgs = listOf("-Dlogback.configurationFile=logback-custom.xml")    
+    // mainClass.set("io.ktor.server.tomcat.jakarta.EngineMain")    
+    // applicationDefaultJvmArgs = listOf(
+    //     "--enable-native-access=ALL-UNNAMED",
+    //     "-Dio.ktor.development=true"
+    // )    
 }
 
 tasks.withType<JavaExec> {
+    systemProperty("java.awt.headless", "true")
+}
+
+tasks.withType<Test> {
     systemProperty("java.awt.headless", "true")
 }
 
@@ -64,7 +77,11 @@ dependencies {
     implementation("io.github.g0dkar:qrcode-kotlin:4.5.0")    
     implementation("dev.samstevens.totp:totp:1.7.1")    
     implementation("com.google.zxing:core:3.5.3")
-    implementation("io.github.g0dkar:qrcode-kotlin-jvm:4.5.0")    
+    implementation("io.github.g0dkar:qrcode-kotlin-jvm:4.5.0")
+
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.google.zxing:javase:3.5.3")
+
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.postgresql:postgresql:42.7.10")

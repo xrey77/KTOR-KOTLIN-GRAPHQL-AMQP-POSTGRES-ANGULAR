@@ -18,6 +18,12 @@ import com.plugins.*
 
 val TokenManagerKey = AttributeKey<TokenManager>("TokenManagerKey")
 
+fun main(args: Array<String>) {
+    System.setProperty("java.awt.headless", "true")         
+    io.ktor.server.netty.EngineMain.main(args)    
+}
+
+
 fun Application.module() {
 
     val tokenManager = TokenManager()     

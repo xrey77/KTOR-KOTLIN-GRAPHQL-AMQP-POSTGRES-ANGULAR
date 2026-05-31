@@ -11,6 +11,13 @@ data class LoginResponse(
 )
 
 @Serializable
+data class OtpVerificationResponse(
+    val message: String,
+    val username: String
+)
+
+
+@Serializable
 data class UpdateResponse(
     val message: String
 )
@@ -31,6 +38,14 @@ data class UploadResponse(
 @Serializable
 data class UploadModel(
     val userpic: String
+)
+
+@Serializable
+data class OtpUserModel(
+    val id: Int,
+    val username: String,
+    val secret: String?,
+    val qrcodeurl: String?
 )
 
 

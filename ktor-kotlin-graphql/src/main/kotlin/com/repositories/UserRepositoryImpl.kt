@@ -6,6 +6,7 @@ import com.api.model.LoginModel
 import com.api.model.UserModel
 import com.api.model.ActivateMfaModel
 import com.api.model.User
+import com.api.model.OtpUserModel
 import com.api.model.MfaUserModel
 import com.api.model.UploadModel
 import com.api.model.RoleModel
@@ -70,6 +71,8 @@ interface UserRepository {
     suspend fun findUserById(idno: Int): UserModel?
     suspend fun activateMfa(id: Int, twofactorenabled: Boolean, secret: String, qrcodeurl: String): UserModel?
     suspend fun uploadUpdateProfilepic(id: Int, userpic: String): UserModel?
+    suspend fun findOtpVerification(idno: Int): OtpUserModel?
+
 }
 
 class UserRepositoryImpl : UserRepository {
@@ -132,6 +135,15 @@ class UserRepositoryImpl : UserRepository {
         )
     }
 
+
+        private fun otpmfaUser(row: ResultRow): OtpUserModel {
+        return OtpUserModel(
+            id = row[UserTable.id],
+            username = row[UserTable.username],
+            secret = row[UserTable.secret],
+            qrcodeurl = row[UserTable.qrcodeurl]
+        )
+    }
 
     suspend fun updateProfile(id: Int, fname: String, lname: String, mobile: String): UserModel = newSuspendedTransaction {
         println("Inputs: $fname, $lname, $mobile") 
@@ -206,6 +218,17 @@ class UserRepositoryImpl : UserRepository {
                 .singleOrNull()
         }
     }
+
+
+    override suspend fun findOtpVerification(idno: Int): OtpUserModel? {
+        return newSuspendedTransaction {
+            UserTable.selectAll()
+                .where { UserTable.id eq idno }
+                .map { otpmfaUser(it) }
+                .singleOrNull()
+        }
+    }
+
 
     override suspend fun findByEmail(email: String): RegisterModel? {
         return newSuspendedTransaction {
