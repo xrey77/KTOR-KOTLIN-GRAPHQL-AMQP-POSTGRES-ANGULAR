@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 
 fun Application.configureRabbitmq() {
-    // Fixed: Accessing config safely via environment.config
     val connectionUri: String = environment.config.propertyOrNull("rabbitmq.uri")?.getString() ?: run {
         log.info("RabbitMQ disabled, no connection URI provided")
         return
@@ -69,3 +68,5 @@ fun Application.configureRabbitmq() {
         }
     }
 }
+
+

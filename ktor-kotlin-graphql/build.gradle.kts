@@ -9,6 +9,7 @@ group = "com.postgres.amqp"
 version = "1.0.0-SNAPSHOT"
 
 application {
+    mainClass.set("io.ktor.server.netty.EngineMain")    
     applicationDefaultJvmArgs = listOf("-Dlogback.configurationFile=logback-custom.xml")    
     mainClass.set("io.ktor.server.tomcat.jakarta.EngineMain")    
     applicationDefaultJvmArgs = listOf(
@@ -28,15 +29,17 @@ val ktor_version = "3.5.0"
 
 dependencies {
     val exposedVersion = "0.50.0"    
+
+    implementation("io.ktor:ktor-server-core-jvm:$ktor_version")    
+    implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
+    implementation("com.expediagroup:graphql-kotlin-ktor-server:9.1.0")
+
     implementation("io.ktor:ktor-server-tomcat-jakarta:3.5.0")
     implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
     implementation("io.ktor:ktor-server-config-yaml-jvm:$ktor_version")
     testImplementation("io.ktor:ktor-server-config-yaml-jvm:$ktor_version")
 
-    implementation("io.ktor:ktor-server-core-jvm:$ktor_version")    
     implementation("io.ktor:ktor-http-jvm:$ktor_version")
-
-    implementation("com.expediagroup:graphql-kotlin-ktor-server:9.1.0")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
@@ -46,6 +49,22 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-crypt:0.50.0")         
     implementation("org.mindrot:jbcrypt:0.4")
 
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+
+    // jwt
+    implementation("io.ktor:ktor-server-auth:$ktor_version")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
+
+    // Image Upload
+    implementation("io.ktor:ktor-client-core:3.0.0")
+    implementation("io.ktor:ktor-client-cio:3.0.0")
+
+    // TOTP
+    // implementation("com.github.g0dkar:qrcode-kotlin:4.1.1") 
+    implementation("io.github.g0dkar:qrcode-kotlin:4.5.0")    
+    implementation("dev.samstevens.totp:totp:1.7.1")    
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("io.github.g0dkar:qrcode-kotlin-jvm:4.5.0")    
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.postgresql:postgresql:42.7.10")

@@ -1,13 +1,15 @@
 ktor:
+  development: false
   deployment:
-    port: 8080
+    port: 8080    
   application:
     modules:
-      - com.postgres.amqp.SerializationKt.configureSerialization
+      - com.api.ApplicationKt.module
       - com.postgres.amqp.RequestValidationKt.configureRequestValidation
       - com.postgres.amqp.ExposedKt.configureExposed
       - com.postgres.amqp.RabbitmqKt.configureRabbitmq
-      - com.postgres.amqp.RoutingKt.configureRouting      
+      - com.api.ApplicationKt.configureSecurity    
+
 rabbitmq:
   uri: "amqp://guest:guest@localhost:5672"
   name: "ktor-consumer"

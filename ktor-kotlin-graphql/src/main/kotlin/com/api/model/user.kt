@@ -80,7 +80,8 @@ data class LoginModel(
     val mailtoken: Int,
     val userpic: String,
     val secret: String?, 
-    val qrcodeurl: String?
+    val qrcodeurl: String?,
+    val token: String
 )
 
 @Serializable

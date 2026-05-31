@@ -6,11 +6,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import com.api.model.UserModel
-import com.api.repositories.UserTable
+import com.repositories.UserTable
 
 class UserQuery : Query {
-
-    fun healthCheck(): String = "RabbitMQ and Ktor are running!"
     
     fun getUserById(id: String): UserModel? {
         val intId = id.toIntOrNull() ?: return null
@@ -58,3 +56,45 @@ class UserQuery : Query {
         }
     }
 }
+
+data class User(val id: String, val name: String)
+
+
+
+// getUserById - REQUEST ===============
+// query GetUserById($id: String!) {
+//   getUserById(id: $id) {
+//     id
+//     firstname
+//     lastname
+//     email
+//     mobile
+//     username
+//     userpic
+//     isActive
+//     isBlocked
+//     qrcodeurl
+//   }
+// }
+
+// getUserById - VARIABLES ===============
+// {
+//   "id": "1"
+// }
+
+
+// GetAllUsers - REQUEST ===================
+// query GetAllUsers {
+//   getAllUsers {
+//     id
+//     firstname
+//     lastname
+//     email
+//     mobile
+//     userpic
+//     userpic
+//     isActive
+//     isBlocked
+//     qrcodeurl
+//   }     
+// }
