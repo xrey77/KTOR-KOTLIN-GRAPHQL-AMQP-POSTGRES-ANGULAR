@@ -1,3 +1,4 @@
+// src/main/kotlin/api/model/product.kt
 package com.api.model
 
 import kotlinx.serialization.Serializable
@@ -18,11 +19,11 @@ data class ProductModel(
 
 
 @Serializable
-data class PagedResponse<T>(
+data class PagedResponse(
     val page: Int,
     val totalPages: Int,
-    val totalRecords: Long,
-    val products: List<T>
+    val totalRecords: Int,
+    val products: List<ProductModel>
 )
 
 @Serializable
@@ -54,7 +55,7 @@ data class ProductDetail(
     val id: Int,
     val descriptions: String,
     val qty: Int,
-    val unit: String,
+    val unit: String?,
     val costprice: Double,
     val sellprice: Double
 )

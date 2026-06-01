@@ -21,18 +21,58 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
+
 import io.ktor.http.*
 import java.io.File
 import java.util.Base64
 
-// import io.ktor.http.content.PartData
-// import io.ktor.http.content.forEachPart
-// import io.ktor.http.content.streamProvider
-// import io.ktor.server.request.receiveMultipart
-// import java.io.File
+import io.ktor.http.HttpStatusCode
+import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
+import com.expediagroup.graphql.generator.annotations.GraphQLDescription
+
 import io.ktor.utils.io.* 
 import kotlinx.io.*
 
+import graphql.ErrorType
+import graphql.GraphQLError
+import graphql.language.SourceLocation
+import graphql.GraphqlErrorException
+
+
+// class GraphqlCustomException(
+//     override val message: String,
+//     val statusCode: Int
+// ) : RuntimeException(message), GraphQLError {
+
+//     override fun getExtensions(): Map<String, Any> {
+//         return mapOf(
+//             "code" to statusCode,
+//             "timestamp" to System.currentTimeMillis()
+//         )
+//     }
+
+//     override fun getErrorType(): ErrorType = ErrorType.DataFetchingException
+//     override fun getLocations(): List<SourceLocation>? = null
+// }
+
+// class GraphqlCustomException(
+//     @get:GraphQLIgnore
+//     override val message: String,
+//     val statusCode: Int
+// ) : RuntimeException(message), GraphQLError {
+
+//     override fun getMessage(): String = message
+
+//     override fun getExtensions(): Map<String, Any> {
+//         return mapOf(
+//             "code" to statusCode,
+//             "timestamp" to System.currentTimeMillis()
+//         )
+//     }
+
+//     override fun getErrorType(): ErrorType = ErrorType.DataFetchingException
+//     override fun getLocations(): List<SourceLocation>? = null
+// }
 
 
 class UserService(private val userRepository: UserRepositoryImpl) {
@@ -71,7 +111,6 @@ class UserService(private val userRepository: UserRepositoryImpl) {
 
         return userRepository.save(newUser)         
     }
-
 
     suspend fun userAccount(request: UserLoginDto): LoginModel {
         require(request.password.length >= 3) { "Password must be at least 3 characters" }
@@ -112,6 +151,63 @@ class UserService(private val userRepository: UserRepositoryImpl) {
 
     }
 
+
+    // suspend fun userAccount(request: UserLoginDto): ServiceResponse<LoginModel> {
+    //     return  try {
+
+    //         require(request.password.length >= 3) { "Password must be at least 3 characters" }
+
+    //         val sanitizedUsername = request.username.trim()
+    //         val existingUser = userRepository.findLoginUsername(sanitizedUsername) //?: throw Exception("Invalid credentials")
+    //         if (existingUser == null) {
+    //             return ServiceResponse(
+    //                 status = HttpStatusCode.Unauthorized,
+    //                 message = "Username not found, please register now."
+    //             )
+    //         }
+
+
+    //             val isPasswordValid = BCrypt.checkpw(request.password.trim(), existingUser.password) 
+    //             // ?: throw Exception("Invalid credentials")
+    //             if (!isPasswordValid) {
+    //                 return ServiceResponse(
+    //                     status = HttpStatusCode.Unauthorized,
+    //                     message = "Invalid password, please try again."
+    //                 )
+    //             }
+
+    //             val tokenManager = TokenManager()
+    //             val tokenid = tokenManager.generateToken(existingUser.username)
+
+    //             val loginModel = LoginModel(
+    //                 id = existingUser.id,
+    //                 firstname = existingUser.firstname,
+    //                 lastname = existingUser.lastname,
+    //                 email = existingUser.email,
+    //                 mobile = existingUser.mobile,
+    //                 username = existingUser.username,
+    //                 password = "",
+    //                 isActive = existingUser.isActive,
+    //                 isBlocked = existingUser.isBlocked,
+    //                 mailtoken = existingUser.mailtoken,
+    //                 userpic = existingUser.userpic,
+    //                 secret = existingUser.secret,
+    //                 qrcodeurl = existingUser.qrcodeurl,
+    //                 token = tokenid
+    //             )
+
+    //             ServiceResponse(
+    //                 status = HttpStatusCode.OK,
+    //                 data = loginModel
+    //             )
+
+    //     } catch (e: Exception) {
+    //         ServiceResponse(
+    //             status = HttpStatusCode.InternalServerError,
+    //             message = e.localizedMessage ?: "An unexpected error occurred"
+    //         )
+    //     }                
+    // }
 
     // suspend fun getUserData(id: Int): UserModel {
     //     val existingUser = userRepository.findUserById(id)

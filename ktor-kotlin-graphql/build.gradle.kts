@@ -35,6 +35,13 @@ tasks.withType<Test> {
     systemProperty("java.awt.headless", "true")
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>().configureEach {
+    compilerOptions {
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+}
+
+
 kotlin {
     jvmToolchain(21)
 }
@@ -45,7 +52,10 @@ dependencies {
 
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")    
     implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
+    
+    // graphql
     implementation("com.expediagroup:graphql-kotlin-ktor-server:9.1.0")
+    implementation("com.expediagroup:graphql-kotlin-schema-generator:9.1.0") 
 
     implementation("io.ktor:ktor-server-tomcat-jakarta:3.5.0")
     implementation("io.ktor:ktor-server-config-yaml:$ktor_version")

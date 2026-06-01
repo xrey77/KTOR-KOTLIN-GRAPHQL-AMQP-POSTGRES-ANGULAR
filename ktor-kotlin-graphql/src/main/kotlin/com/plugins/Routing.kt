@@ -12,9 +12,10 @@ import io.ktor.http.ContentType
 import io.ktor.server.http.content.staticFiles
 import io.ktor.server.http.content.staticResources
 
-import com.expediagroup.graphql.server.ktor.GraphQL
 import com.api.graphql.queries.UserLookupQuery
 import com.api.graphql.queries.UserListQuery
+import com.api.graphql.queries.ProductListQuery
+import com.api.graphql.queries.RootQuery
 
 import com.api.graphql.mutations.CreateUserMutation
 import com.api.graphql.mutations.LoginUserMutation
@@ -24,12 +25,17 @@ import com.api.graphql.mutations.ActivateMfaMutation
 import com.api.graphql.mutations.OtpMfaMutation
 import com.api.graphql.mutations.UploadpicMutation
 
+import com.expediagroup.graphql.server.ktor.GraphQL
+import com.expediagroup.graphql.generator.SchemaGeneratorConfig
+import com.expediagroup.graphql.generator.toSchema
+import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.server.ktor.graphQLPostRoute
 import com.expediagroup.graphql.server.ktor.graphiQLRoute
 import com.expediagroup.graphql.server.ktor.graphQLGetRoute
+import com.expediagroup.graphql.server.types.GraphQLRequest
+
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-
 
 
 fun Application.configureRouting() {
@@ -40,7 +46,8 @@ fun Application.configureRouting() {
             packages = listOf("com.api.graphql", "com.api.model")
             queries = listOf(
                 UserLookupQuery(),
-                UserListQuery()
+                UserListQuery(),
+                ProductListQuery()
             )
             mutations = listOf(
                 CreateUserMutation(),
@@ -58,7 +65,6 @@ fun Application.configureRouting() {
         get("/api/test") {
             call.respondText("testing.....")
         }
-
 
         staticFiles("/static", File("users"))
         staticResources("/", "static", index = "index.html") 
