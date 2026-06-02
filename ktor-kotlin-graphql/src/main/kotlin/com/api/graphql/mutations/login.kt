@@ -1,3 +1,4 @@
+// src/main/kotlin/com/api/graphql/mutations/login.kt
 package com.api.graphql.mutations
 
 import com.expediagroup.graphql.server.operations.Mutation
@@ -5,6 +6,9 @@ import com.repositories.UserRepositoryImpl
 import com.services.UserService
 import com.api.model.dto.UserLoginDto
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
+import com.services.RabbitMqProducer
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 data class LoginUserInput(val username: String, val password: String)
 
@@ -34,6 +38,19 @@ class LoginUserMutation : Mutation {
             password = input.password
         )
         val user = userService.userAccount(userlogin)
+
+        val jsonPayload = buildJsonObject {
+            put("eventId", java.util.UUID.randomUUID().toString())
+            put("userId", user.id)
+            put("event", "USER_LOGIN_VERIFIED")            
+        }.toString()
+
+        try {
+            RabbitMqProducer.publishLoginEvent(jsonPayload)
+        } catch (e: Exception) {
+            // Log exception here to prevent RabbitMQ failures from crashing the user login experience
+            println("Failed to publish login event to RabbitMQ: ${e.message}")
+        }
 
         return LoginPayload(
             id = user.id, 

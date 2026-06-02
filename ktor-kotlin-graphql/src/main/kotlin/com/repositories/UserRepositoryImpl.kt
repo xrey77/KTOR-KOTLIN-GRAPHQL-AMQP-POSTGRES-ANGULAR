@@ -40,6 +40,23 @@ object UserTable : Table("users") {
     override val primaryKey = PrimaryKey(id)
 }
 
+object UsersTable : Table("users") {
+    val id = integer("id").autoIncrement()
+    val firstname = varchar("firstname", 50)
+    val lastname = varchar("lastname", 50)
+    val email = varchar("email", 100).uniqueIndex()
+    val mobile = varchar("mobile", 20)
+    val username = varchar("username", 50).uniqueIndex()
+    val isActive = bool("isActive").default(true)
+    val isBlocked = bool("isBlocked").default(false)
+    val mailtoken = integer("mailtoken").default(0)
+    val userpic = varchar("userpic", 244)
+    val qrcodeurl = text("qrcodeurl")
+    val role_id = integer("role_id")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object Users : Table("users") {
     val id = integer("id").autoIncrement()
     val secret = text("secret").nullable()
@@ -52,7 +69,6 @@ object UserProfilepic : Table("users") {
     val userpic = varchar("userpic", 244)
     override val primaryKey = PrimaryKey(id)
 }
-
 
 object RoleTable : Table("roles") {
     val id = integer("id").autoIncrement()
@@ -72,7 +88,7 @@ interface UserRepository {
     suspend fun activateMfa(id: Int, twofactorenabled: Boolean, secret: String, qrcodeurl: String): UserModel?
     suspend fun uploadUpdateProfilepic(id: Int, userpic: String): UserModel?
     suspend fun findOtpVerification(idno: Int): OtpUserModel?
-
+    suspend fun getAllUsers(): List<UserModel>
 }
 
 class UserRepositoryImpl : UserRepository {
@@ -125,6 +141,23 @@ class UserRepositoryImpl : UserRepository {
             qrcodeurl = row[UserTable.qrcodeurl]
         )
     }
+
+    private fun usersAll(row: ResultRow): UserModel {
+        return UserModel(
+            id = row[UsersTable.id],
+            firstname = row[UsersTable.firstname],
+            lastname = row[UsersTable.lastname],
+            email = row[UsersTable.email],
+            mobile = row[UsersTable.mobile],
+            username = row[UsersTable.username],
+            isActive = row[UsersTable.isActive],
+            isBlocked = row[UsersTable.isBlocked],
+            mailtoken = row[UsersTable.mailtoken],
+            userpic = row[UsersTable.userpic],
+            qrcodeurl = row[UsersTable.qrcodeurl]
+        )
+    }
+
 
     private fun mfaUser(row: ResultRow): MfaUserModel {
         return MfaUserModel(
@@ -207,6 +240,14 @@ class UserRepositoryImpl : UserRepository {
                 .where { UserTable.id eq idno }
                 .map { userIdToUser(it) }
                 .singleOrNull()
+        }
+    }
+
+    override suspend fun getAllUsers(): List<UserModel> {
+        return newSuspendedTransaction {
+            UsersTable
+                .selectAll()
+                .map { row -> usersAll(row) }
         }
     }
 

@@ -1,39 +1,46 @@
+// src/main/kotlin/Rabbitmq.kt
 package com.postgres.amqp
 
 import io.github.damir.denis.tudor.ktor.server.rabbitmq.RabbitMQ
 import io.github.damir.denis.tudor.ktor.server.rabbitmq.dsl.*
 import io.github.damir.denis.tudor.ktor.server.rabbitmq.rabbitMQ
-import io.ktor.server.application.*
-import io.ktor.server.config.property
 import io.ktor.server.config.propertyOrNull
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import com.rabbitmq.client.ConnectionFactory
+import io.ktor.server.application.*
+import com.rabbitmq.client.AMQP
 
 fun Application.configureRabbitmq() {
-    val connectionUri: String = environment.config.propertyOrNull("rabbitmq.uri")?.getString() ?: run {
-        log.info("RabbitMQ disabled, no connection URI provided")
-        return
-    }
-    val connectionName: String = environment.config.property("rabbitmq.name").getString()
-    
-    val exceptionHandler = CoroutineExceptionHandler { _, throwable -> 
-        log.error("ExceptionHandler got $throwable") 
-    }
-    val rabbitMQScope = CoroutineScope(SupervisorJob() + exceptionHandler)
+    val rabbitHost = environment.config.propertyOrNull("ktor.rabbitmq.host")?.getString() ?: "localhost"
+    val rabbitPort = environment.config.propertyOrNull("ktor.rabbitmq.port")?.getString()?.toInt() ?: 5672
+    val rabbitUser = environment.config.propertyOrNull("ktor.rabbitmq.username")?.getString() ?: "guest"
+    val rabbitPassword = environment.config.propertyOrNull("ktor.rabbitmq.password")?.getString() ?: "guest"
+    val rabbitVHost = environment.config.propertyOrNull("ktor.rabbitmq.virtualHost")?.getString() ?: "/"
 
-    // Plugin initialization
+    val exceptionHandler = CoroutineExceptionHandler { _, throwable -> 
+        val cause = throwable.cause ?: throwable
+        log.error("RabbitMQ Channel Error Root Cause: ${cause.message}", cause) 
+    }
+
+    val rabbitMQScope = CoroutineScope(SupervisorJob() + exceptionHandler)
+    
     install(RabbitMQ) {
-        uri = connectionUri
-        defaultConnectionName = connectionName
+        ConnectionFactory().apply {
+            host = rabbitHost
+            port = rabbitPort
+            username = rabbitUser
+            password = rabbitPassword
+            virtualHost = rabbitVHost
+        }              
+        defaultConnectionName = "Ktor-CLI-Client" 
         dispatcherThreadPollSize = 4
         tlsEnabled = false
         scope = rabbitMQScope
     }
 
-    // Fixed: Consolidated infrastructure topology setup into a single block
     rabbitmq {
-        // Dead Letter Queue Setup
         queueBind {
             queue = "dlq"
             exchange = "dlx"
@@ -41,6 +48,7 @@ fun Application.configureRabbitmq() {
             exchangeDeclare {
                 exchange = "dlx"
                 type = "direct"
+                durable = false
             }
             queueDeclare {
                 queue = "dlq"
@@ -48,7 +56,6 @@ fun Application.configureRabbitmq() {
             }
         }
 
-        // Test Queue Setup (Fixed trailing cut-off error)
         queueBind {
             queue = "test-queue"
             exchange = "test-exchange"
@@ -56,17 +63,28 @@ fun Application.configureRabbitmq() {
             exchangeDeclare {
                 exchange = "test-exchange"
                 type = "direct"
+                durable = false
+            }
+            // queueDeclare {
+            //     queue = "test-queue"
+            //     durable = true
+            // }
+        }
+
+        queueBind {
+            queue = "central-topic-queue"
+            exchange = "central-topic-exchange" 
+            routingKey = "central.updates.*"
+            exchangeDeclare {
+                exchange = "central-topic-exchange"
+                type = "topic"              
+                durable = true
             }
             queueDeclare {
-                queue = "test-queue"
-                // If assigning dead letter routing to this queue:
-                arguments = mapOf(
-                    "x-dead-letter-exchange" to "dlx",
-                    "x-dead-letter-routing-key" to "dlq-dlx"
-                )
+                queue = "central-topic-queue"
+                durable = true
             }
         }
+        log.info("RabbitMQ is running and initialized successfully")        
     }
 }
-
-

@@ -160,8 +160,8 @@ data class User(
     val isBlocked: Boolean,
     val mailtoken: Int,
     val userpic: String,
-    val secret: String, 
-    val qrcodeurl: String, 
+    val secret: String?, 
+    val qrcodeurl: String?, 
     val createdAt: String, 
     val updatedAt: String,
     val role: Role

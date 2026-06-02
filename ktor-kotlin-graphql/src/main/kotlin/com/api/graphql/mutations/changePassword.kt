@@ -1,4 +1,4 @@
-// src/main/kotlin/com/api/graphql/mutations/updateProfile.kt
+// src/main/kotlin/com/api/graphql/mutations/changePassword.kt
 package com.api.graphql.mutations
 
 import com.expediagroup.graphql.server.operations.Mutation

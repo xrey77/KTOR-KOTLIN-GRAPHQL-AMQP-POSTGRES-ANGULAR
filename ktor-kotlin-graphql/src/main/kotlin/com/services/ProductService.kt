@@ -1,4 +1,5 @@
-package com.kotlin.services
+// src/main/kotlin/com/services/ProductService.kt
+package com.services
 
 import com.api.model.ProductModel
 import com.api.model.CategoryWithProducts

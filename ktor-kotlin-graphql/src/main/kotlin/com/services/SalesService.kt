@@ -1,4 +1,5 @@
-package com.kotlin.services
+// src/main/kotlin/com/services/SalesService.kt
+package com.services
 
 import com.api.model.Sale
 import com.api.model.SaleModel
@@ -9,7 +10,7 @@ class SalesService(private val salesRepository: SalesRepositoryImpl) {
     suspend fun salesDataList(): List<SaleModel> {
         val response = salesRepository.findSales()
         if (response.isEmpty()) {
-            throw IllegalArgumentException("Sales not found.")
+            throw IllegalArgumentException("Sales data not found.")
         }
         return response
     }    

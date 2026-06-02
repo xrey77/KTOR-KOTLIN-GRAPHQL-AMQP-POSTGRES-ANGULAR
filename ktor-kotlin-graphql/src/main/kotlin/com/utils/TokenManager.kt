@@ -27,7 +27,6 @@ class TokenManager() {
         .withIssuer(issuer)
         .build()
 
-
     fun generateToken(username: String): String {
         return JWT.create()
             .withAudience(audience)

@@ -1,6 +1,7 @@
 //src/main/kotlin/com/api/plugins/Routing.kt
 package com.plugins
 
+import io.ktor.server.auth.authenticate
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import java.io.File
@@ -16,6 +17,9 @@ import com.api.graphql.queries.UserLookupQuery
 import com.api.graphql.queries.UserListQuery
 import com.api.graphql.queries.ProductListQuery
 import com.api.graphql.queries.RootQuery
+import com.api.graphql.queries.GetProductSearch
+import com.api.graphql.queries.SalesDataQuery
+import com.api.graphql.queries.ProductMasterDetailsQuery
 
 import com.api.graphql.mutations.CreateUserMutation
 import com.api.graphql.mutations.LoginUserMutation
@@ -36,10 +40,13 @@ import com.expediagroup.graphql.server.types.GraphQLRequest
 
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+// import com.api.graphql.DefaultKtorGraphQLContextFactory
 
+// import com.expediagroup.graphql.server.ktor.KtorGraphQLContextFactory
 
 fun Application.configureRouting() {
     log.info("test............................")     
+    // val contextFactory = CustomGraphQLContextFactory() 
 
     install(GraphQL) {
         schema {
@@ -47,7 +54,10 @@ fun Application.configureRouting() {
             queries = listOf(
                 UserLookupQuery(),
                 UserListQuery(),
-                ProductListQuery()
+                ProductListQuery(),
+                GetProductSearch(),
+                SalesDataQuery(),
+                ProductMasterDetailsQuery()
             )
             mutations = listOf(
                 CreateUserMutation(),
@@ -59,6 +69,9 @@ fun Application.configureRouting() {
                 UploadpicMutation()
             )            
         }
+        // server {
+        //     contextFactory = CustomGraphQLContextFactory()
+        // }        
     }
 
     routing {
@@ -76,9 +89,11 @@ fun Application.configureRouting() {
             )
         }
 
-        graphiQLRoute(endpoint = "graphiql", graphQLEndpoint = "graphql")
-        graphQLPostRoute(endpoint = "graphql")
-        graphQLGetRoute(endpoint = "graphql")
+        // authenticate("auth-jwt") { 
+            graphiQLRoute(endpoint = "graphiql", graphQLEndpoint = "graphql")
+            graphQLPostRoute(endpoint = "graphql")
+            graphQLGetRoute(endpoint = "graphql")
+        // }
 
     }
 }

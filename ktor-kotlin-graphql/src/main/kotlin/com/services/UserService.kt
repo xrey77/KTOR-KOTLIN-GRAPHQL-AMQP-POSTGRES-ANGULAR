@@ -75,6 +75,7 @@ import graphql.GraphqlErrorException
 // }
 
 
+
 class UserService(private val userRepository: UserRepositoryImpl) {
 
     private val totService =  TotpService()
@@ -209,6 +210,10 @@ class UserService(private val userRepository: UserRepositoryImpl) {
     //     }                
     // }
 
+
+    suspend fun getAllUsers(): List<UserModel> {
+        return userRepository.getAllUsers()
+    }
     // suspend fun getUserData(id: Int): UserModel {
     //     val existingUser = userRepository.findUserById(id)
     //     if (existingUser != null) {

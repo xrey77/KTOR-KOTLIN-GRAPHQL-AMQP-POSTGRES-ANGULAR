@@ -15,20 +15,17 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.util.AttributeKey
 import com.utils.TokenManager
 import com.plugins.*
+import kotlinx.coroutines.launch
+import com.services.RabbitMqConsumer
+import io.ktor.server.application.ApplicationStarted
+import io.ktor.server.application.ApplicationStopped
+
 
 val TokenManagerKey = AttributeKey<TokenManager>("TokenManagerKey")
 
 fun main(args: Array<String>) {
     System.setProperty("java.awt.headless", "true")         
     io.ktor.server.netty.EngineMain.main(args)    
-}
-
-
-fun Application.module() {
-
-    val tokenManager = TokenManager()     
-    attributes.put(TokenManagerKey, tokenManager)    
-    configureRouting()    
 }
 
 fun Application.configureSecurity() {
@@ -48,6 +45,28 @@ fun Application.configureSecurity() {
         }
     }
 }
+
+fun Application.module() {
+    val rabbitMqConsumer = RabbitMqConsumer()
+
+    monitor.subscribe(ApplicationStarted) {
+        launch {
+            rabbitMqConsumer.startListening()
+        }
+    }    
+
+    // monitor.subscribe(ApplicationStopped) {
+    //     rabbitMqConsumer.ApplicationStopped()
+    // }
+    // configureSecurity() 
+    // val tokenManager = TokenManager()     
+    // attributes.put(TokenManagerKey, tokenManager)    
+
+    configureRouting()  
+
+
+}
+
 
 @Serializable
 data class ErrorResponse(val message: String)

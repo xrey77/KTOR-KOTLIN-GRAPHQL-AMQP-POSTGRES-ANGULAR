@@ -1,4 +1,4 @@
-// src/main/kotlin/com/api/graphql/mutations/activateMfa.kt
+// src/main/kotlin/com/api/graphql/mutations/verifyOtp.kt
 package com.api.graphql.mutations
 
 import com.expediagroup.graphql.server.operations.Mutation

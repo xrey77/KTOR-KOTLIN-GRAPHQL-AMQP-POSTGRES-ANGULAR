@@ -1,3 +1,4 @@
+// src/main/kotlin/com/repositories/SalesRepositoryImpl.kt
 package com.repositories
 
 import org.jetbrains.exposed.sql.*
@@ -16,11 +17,9 @@ object SaleTable : Table("sales") {
     override val primaryKey = PrimaryKey(id)
 }
 
-
 interface SaleRepository {
     suspend fun findSales(): List<SaleModel>
 }
-
 
 class SalesRepositoryImpl : SaleRepository {
 
@@ -32,9 +31,7 @@ class SalesRepositoryImpl : SaleRepository {
         )
     }
 
-
     override suspend fun findSales(): List<SaleModel> = newSuspendedTransaction {
         SaleTable.selectAll().map { rowToSale(it) }
     }
-
 }

@@ -9,7 +9,6 @@ group = "com.postgres.amqp"
 version = "1.0.0-SNAPSHOT"
 
 application {
-    // mainClass.set("io.ktor.server.netty.EngineMain")    
     mainClass.set("com.api.ApplicationKt")     
 
     applicationDefaultJvmArgs = listOf(
@@ -18,13 +17,6 @@ application {
         "--enable-native-access=ALL-UNNAMED",
         "-Dio.ktor.development=true"
     )        
-    // mainClass.set("io.ktor.server.netty.EngineMain")    
-    // applicationDefaultJvmArgs = listOf("-Dlogback.configurationFile=logback-custom.xml")    
-    // mainClass.set("io.ktor.server.tomcat.jakarta.EngineMain")    
-    // applicationDefaultJvmArgs = listOf(
-    //     "--enable-native-access=ALL-UNNAMED",
-    //     "-Dio.ktor.development=true"
-    // )    
 }
 
 tasks.withType<JavaExec> {
@@ -41,7 +33,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>().configureEa
     }
 }
 
-
 kotlin {
     jvmToolchain(21)
 }
@@ -52,7 +43,8 @@ dependencies {
 
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")    
     implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
-    
+
+
     // graphql
     implementation("com.expediagroup:graphql-kotlin-ktor-server:9.1.0")
     implementation("com.expediagroup:graphql-kotlin-schema-generator:9.1.0") 
@@ -92,10 +84,11 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.google.zxing:javase:3.5.3")
 
-
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.postgresql:postgresql:42.7.10")
 
+    // rabbitmq clien
+    implementation("com.rabbitmq:amqp-client:5.21.0")     
 
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.auth)

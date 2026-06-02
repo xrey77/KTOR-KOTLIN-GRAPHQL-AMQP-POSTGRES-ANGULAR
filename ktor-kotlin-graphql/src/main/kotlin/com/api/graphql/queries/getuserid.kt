@@ -6,12 +6,19 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.selectAll
 import com.api.model.UserModel
 import com.repositories.UserTable
+import com.services.RabbitMqProducer
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+
+import com.utils.TokenManagerKey 
+
 
 class UserLookupQuery : Query {
     
-    fun getUserById(id: String): UserModel? {
+    suspend fun getUserById(id: String): UserModel? {
         val intId = id.toIntOrNull() ?: return null
-        return transaction {
+
+        val user = transaction {
             UserTable
                 .selectAll().where { UserTable.id eq intId }
                 .map { row ->
@@ -31,6 +38,22 @@ class UserLookupQuery : Query {
                 }
                 .singleOrNull()
         }
+
+        if (user != null) {
+            val jsonPayload = buildJsonObject {
+                put("eventId", java.util.UUID.randomUUID().toString())
+                put("userId", user.id)
+                put("event", "GETUSER_ID_VERIFIED")            
+            }.toString()
+
+            try {
+                RabbitMqProducer.publishLoginEvent(jsonPayload)
+            } catch (e: Exception) {
+                println("Failed to publish RabbitMQ event: ${e.message}") 
+            }
+        }
+
+        return user
     }
 }
 
